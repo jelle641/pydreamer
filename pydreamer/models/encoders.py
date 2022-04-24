@@ -39,7 +39,7 @@ class MultiEncoder(nn.Module):
         self.out_dim = ((self.encoder_image.out_dim if self.encoder_image else 0) +
                         (self.encoder_vecobs.out_dim if self.encoder_vecobs else 0))
 
-    def forward(self, obs: Dict[str, Tensor]) -> TensorTBE:
+    def forward(self, obs: Dict[str, Tensor], new_output: Tensor = None) -> TensorTBE:
         # TODO:
         #  1) Make this more generic, e.g. working without image input or without vecobs
         #  2) Treat all inputs equally, adding everything via linear layer to embed_dim
@@ -47,7 +47,7 @@ class MultiEncoder(nn.Module):
         embeds = []
 
         if self.encoder_image:
-            image = obs['image']
+            image = obs['image'] - new_output
             T, B, C, H, W = image.shape
             if self.reward_input:
                 reward = obs['reward']

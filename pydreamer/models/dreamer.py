@@ -14,6 +14,7 @@ from .decoders import *
 from .rnn import *
 from .rssm import *
 from .probes import *
+from .NewCNN import *
 
 
 class Dreamer(nn.Module):
@@ -212,6 +213,7 @@ class WorldModel(nn.Module):
         self.kl_weight = conf.kl_weight
         self.kl_balance = None if conf.kl_balance == 0.5 else conf.kl_balance
 
+
         # Encoder
 
         self.encoder = MultiEncoder(conf)
@@ -220,6 +222,9 @@ class WorldModel(nn.Module):
 
         features_dim = conf.deter_dim + conf.stoch_dim * (conf.stoch_discrete or 1)
         self.decoder = MultiDecoder(features_dim, conf)
+
+        
+        self.newcnn = NewCNN(in_channels=conf.image_channels, cnn_depth=conf.cnn_depth)
 
         # RSSM
 
@@ -258,9 +263,12 @@ class WorldModel(nn.Module):
                       forward_only=False
                       ):
 
+
+        new_output = self.newcnn(obs['image'])
+
         # Encoder
 
-        embed = self.encoder(obs)
+        embed = self.encoder(obs, new_output)
 
         # RSSM
 
@@ -277,7 +285,7 @@ class WorldModel(nn.Module):
 
         # Decoder
 
-        loss_reconstr, metrics, tensors = self.decoder.training_step(features, obs)
+        loss_reconstr, metrics, tensors = self.decoder.training_step(features, obs, new_output)
 
         # KL loss
 

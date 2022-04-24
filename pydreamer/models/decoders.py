@@ -1,7 +1,11 @@
 from typing import Optional, Union
+from numpy import size
 import torch
 import torch.nn as nn
 import torch.distributions as D
+# import matplotlib
+# matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 from .functions import *
 from .common import *
@@ -49,6 +53,7 @@ class MultiDecoder(nn.Module):
     def training_step(self,
                       features: TensorTBIF,
                       obs: Dict[str, Tensor],
+                      new_cnn_output: Tensor = None,
                       extra_metrics: bool = False
                       ) -> Tuple[TensorTBI, Dict[str, Tensor], Dict[str, Tensor]]:
         tensors = {}
@@ -56,7 +61,7 @@ class MultiDecoder(nn.Module):
         loss_reconstr = 0
 
         if self.image:
-            loss_image_tbi, loss_image, image_rec = self.image.training_step(features, obs['image'])
+            loss_image_tbi, loss_image, image_rec = self.image.training_step(features, obs['image'], new_cnn_output)
             loss_reconstr += self.image_weight * loss_image_tbi
             metrics.update(loss_image=loss_image.detach().mean())
             tensors.update(loss_image=loss_image.detach(),
@@ -146,24 +151,48 @@ class ConvDecoder(nn.Module):
             activation(),
             nn.ConvTranspose2d(d, out_channels, kernels[3], stride))
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, p: Tensor = None) -> Tensor:
         x, bd = flatten_batch(x)
         y = self.model(x)
+        if p is not None:
+            p, bd_p = flatten_batch(p, 3)
+            print(f"size y flat: {y.size()} size p: {p.size()}")
+            combined_y = y + p
+            combined_y = unflatten_batch(combined_y, bd)
         y = unflatten_batch(y, bd)
+
+        if p is not None:
+            fig, (ax1, ax2) = plt.subplots(1,2)
+            print(f"combined_size = {combined_y.size()}")
+            ax1.imshow(np.clip(combined_y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax1.set_title("Combined output")
+            ax2.imshow(np.clip(y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax2.set_title("decoder output")
+            plt.savefig('pictures/decoder_output.png')
+
         return y
 
     def loss(self, output: Tensor, target: Tensor) -> Tensor:
         output, bd = flatten_batch(output, 3)
         target, _ = flatten_batch(target, 3)
         loss = 0.5 * torch.square(output - target).sum(dim=[-1, -2, -3])  # MSE
+
+        fig, (ax1, ax2) = plt.subplots(1,2)
+        ax1.imshow(np.clip(target.detach().numpy()[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+        ax1.set_title("Input")
+        ax2.imshow(np.clip(output.detach().numpy()[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+        ax2.set_title("Output")
+        plt.savefig('pictures/in_and_output.png')
+
         return unflatten_batch(loss, bd)
 
-    def training_step(self, features: TensorTBIF, target: TensorTBCHW) -> Tuple[TensorTBI, TensorTB, TensorTBCHW]:
+    def training_step(self, features: TensorTBIF, target: TensorTBCHW, new_ccn_output: Tensor) -> Tuple[TensorTBI, TensorTB, TensorTBCHW]:
         assert len(features.shape) == 4 and len(target.shape) == 5
         I = features.shape[2]
         target = insert_dim(target, 2, I)  # Expand target with iwae_samples dim, because features have it
 
-        decoded = self.forward(features)
+        decoded = self.forward(features, new_ccn_output)
+
         loss_tbi = self.loss(decoded, target)
         loss_tb = -logavgexp(-loss_tbi, dim=2)  # TBI => TB
         decoded = decoded.mean(dim=2)  # TBICHW => TBCHW
