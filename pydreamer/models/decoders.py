@@ -156,14 +156,12 @@ class ConvDecoder(nn.Module):
         y = self.model(x)
         if p is not None:
             p, bd_p = flatten_batch(p, 3)
-            print(f"size y flat: {y.size()} size p: {p.size()}")
             combined_y = y + p
             combined_y = unflatten_batch(combined_y, bd)
         y = unflatten_batch(y, bd)
 
         if p is not None:
             fig, (ax1, ax2) = plt.subplots(1,2)
-            print(f"combined_size = {combined_y.size()}")
             ax1.imshow(np.clip(combined_y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax1.set_title("Combined output")
             ax2.imshow(np.clip(y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
