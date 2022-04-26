@@ -17,13 +17,45 @@ class NewCNN(nn.Module):
         super().__init__()
         self.out_dim = cnn_depth * 32
         kernels = (4, 4, 4, 4)
-        stride = 1
+        stride = 2
         padding = 1
         d = cnn_depth
-        self.model = nn.Sequential(
-            nn.Conv2d(in_channels, d, kernels[0], stride, padding=2),
+
+        self.encoder = nn.Sequential(
+            nn.Conv2d(in_channels, d, kernels[0], stride),
             activation(),
-            nn.Conv2d(d, 1, kernels[1], stride, padding),
+            nn.Conv2d(d, d*2, kernels[1], stride),
+            activation(),
+            nn.Conv2d(d*2, d*4, kernels[2], stride),
+            activation(),
+            # nn.Conv2d(d*4, d*8, 4, stride),
+            # activation(),
+        )
+
+        self.neuralnetwork_small = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(4608, 1536),
+            activation(),
+            nn.Unflatten(1, (384, 2, 2)),
+            nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
+            activation(),
+        )
+
+        self.neuralnetwork = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(20736, 10368),
+            activation(),
+            nn.Linear(10368, 6912),
+            activation(),
+            nn.Unflatten(1, (192, 6, 6))
+        )
+
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
+            activation(),
+            nn.ConvTranspose2d(d*2, d, 4, stride=2),
+            activation(),
+            nn.ConvTranspose2d(d, in_channels, 6, stride=2),
             activation(),
         )
 
@@ -32,7 +64,7 @@ class NewCNN(nn.Module):
         self.x_2 = None
         self.x_3 = None
         self.iter = 0
-        self.picture_every = 100
+        self.picture_every = 10
 
     def forward(self, x: Tensor) -> Tensor:
         if self.x_0 is None:
@@ -54,14 +86,16 @@ class NewCNN(nn.Module):
         x_1_out, bd1 = flatten_batch(self.x_1, 3)
         x_2_out, bd2 = flatten_batch(self.x_1, 3)
         x_3_out, bd3 = flatten_batch(self.x_1, 3)
-        y_1 = self.model(x_1_out)
-        y_2 = self.model(x_2_out)
-        y_3 = self.model(x_3_out)
-        y_1 = unflatten_batch(y_1, bd1)
-        y_2 = unflatten_batch(y_2, bd2)
-        y_3 = unflatten_batch(y_3, bd3)
-
-        y = torch.cat((y_1, y_2, y_3), 2)
+        y_1 = self.encoder(x_1_out)
+        y_2 = self.encoder(x_2_out)
+        y_3 = self.encoder(x_3_out)
+        y = torch.stack((y_1, y_2, y_3), 1)
+        # print(f"size y after encoder: {y.size()}")
+        y = self.neuralnetwork(y)
+        # print(f"size y after nn: {y.size()}")
+        y = self.decoder(y)
+        # print(f"size y after decoder: {y.size()}")
+        y = unflatten_batch(y, bd1)
 
         self.iter += 1
         if self.iter == self.picture_every:
