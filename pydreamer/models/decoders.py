@@ -168,6 +168,8 @@ class ConvDecoder(nn.Module):
             ax2.set_title("decoder output")
             plt.savefig('pictures/decoder_output.png')
 
+        if p is not None:
+            return combined_y
         return y
 
     def loss(self, output: Tensor, target: Tensor) -> Tensor:

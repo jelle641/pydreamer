@@ -241,7 +241,9 @@ class WorldModel(nn.Module):
         # Init
 
         for m in self.modules():
+            print(m)
             init_weights_tf2(m)
+        
 
     def init_state(self, batch_size: int) -> Tuple[Any, Any]:
         return self.core.init_state(batch_size)
@@ -263,6 +265,13 @@ class WorldModel(nn.Module):
                       forward_only=False
                       ):
 
+        # print(self.newcnn.parameters())
+        # print(sum(p.numel() for p in self.newcnn.parameters()))
+        # print(sum(p.numel() for p in self.newcnn.parameters() if p.requires_grad))
+        # print(' ------------------------')
+        # print(self.encoder.parameters())
+        # print(sum(p.numel() for p in self.encoder.parameters()))
+        # print(sum(p.numel() for p in self.encoder.parameters() if p.requires_grad))
 
         new_output = self.newcnn(obs['image'])
 
