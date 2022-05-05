@@ -30,28 +30,13 @@ class NewCNN(nn.Module):
             activation(),
             nn.Conv2d(d*4, d*8, 4, stride),
             activation(),
-            nn.Flatten()
+            # nn.Conv2d(d*8, d*16, 2, stride),
+            # activation(),
         )
 
-        # self.neuralnetwork_small = nn.Sequential(
-        #     nn.Flatten(),
-        #     nn.Linear(4608, 1536),
-        #     activation(),
-        #     nn.Unflatten(1, (384, 2, 2)),
-        #     nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
-        #     activation(),
-        # )
-
-        # self.neuralnetwork = nn.Sequential(
-        #     nn.Flatten(),
-        #     nn.Linear(20736, 10368),
-        #     activation(),
-        #     nn.Linear(10368, 6912),
-        #     activation(),
-        #     nn.Unflatten(1, (192, 6, 6))
-        # )
-
         self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(d*16, d*8, 2, stride=2),
+            activation(),
             nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
             activation(),
             nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
@@ -62,18 +47,22 @@ class NewCNN(nn.Module):
             activation()
         )
 
-        self.decoder2 = nn.Sequential(
+        self.deep_decoder = nn.Sequential(
+            nn.Flatten(),
             # FC
             nn.Linear(1536, d * 32),
             nn.Unflatten(-1, (d * 32, 1, 1)),  # type: ignore
             # Deconv
-            nn.ConvTranspose2d(d * 32, d * 4, 5, stride),
+            nn.ConvTranspose2d(d * 32, d * 16, 5, stride),
             activation(),
-            nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
+            nn.ConvTranspose2d(d * 16, d * 4, 5, stride),
             activation(),
-            nn.ConvTranspose2d(d * 2, d, 6, stride),
+            # nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
+            # activation(),
+            nn.ConvTranspose2d(d * 4, d, 6, stride),
             activation(),
-            nn.ConvTranspose2d(d, 3, 6, stride))
+            nn.ConvTranspose2d(d, 3, 6, stride)
+        )
 
         self.x_0 = None
         self.x_1 = None
@@ -100,7 +89,7 @@ class NewCNN(nn.Module):
         # y = unflatten_batch(y, bd)
         # instuff, bd1 = flatten_batch(self.x_3, 3)
         y = self.encoder(combined_history)
-        y = self.decoder2(y)
+        y = self.deep_decoder(y)
         y = unflatten_batch(y, bd)
         # x_1_out, bd1 = flatten_batch(self.x_1, 3)
         # x_2_out, bd2 = flatten_batch(self.x_2, 3)
@@ -113,19 +102,24 @@ class NewCNN(nn.Module):
         # y = self.neuralnetwork(y)
         # # print(f"size y after nn: {y.size()}")
         # y = self.decoder(y)
-        print(f"size history: {combined_history.size()}")
-        print(f"size x input: {x.size()}")
-        print(f"size y after decoder: {y.size()}")
         # y = unflatten_batch(y, bd1)
+
+        # print(f"size history: {combined_history.size()}")
+        # print(f"size x input: {x.size()}")
+        # print(f"size y after decoder: {y.size()}")
+        # print(f"size y numpy: {np.shape(y.detach().numpy())}")
+        # print(f"size y numpy 1 mean: {np.shape(np.mean(y.detach().numpy(), 0))}")
 
         self.iter += 1
         if self.iter == self.picture_every:
             print("Creating pictures")
-            fig, (ax1, ax2) = plt.subplots(1,2)
+            fig, (ax1, ax2, ax3) = plt.subplots(1,3)
             ax1.imshow(np.clip(x.detach().numpy()[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax1.set_title("History input")
+            ax1.set_title("Input")
             ax2.imshow(np.clip(y.detach().numpy()[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax2.set_title("CNN_out")
+            ax2.set_title("CNN_out 1")
+            ax3.imshow(np.clip(np.mean(np.mean(y.detach().numpy(), 0), 0).transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax3.set_title("CNN_out mean")
             plt.savefig('pictures/NewCNN_out.png')
 
             fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
