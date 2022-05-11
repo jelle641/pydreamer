@@ -162,9 +162,9 @@ class ConvDecoder(nn.Module):
 
         if p is not None:
             fig, (ax1, ax2) = plt.subplots(1,2)
-            ax1.imshow(np.clip(combined_y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax1.imshow(np.clip(combined_y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax1.set_title("Combined output")
-            ax2.imshow(np.clip(y.detach().numpy()[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax2.set_title("decoder output")
             plt.savefig('pictures/decoder_output.png')
 
@@ -178,9 +178,9 @@ class ConvDecoder(nn.Module):
         loss = 0.5 * torch.square(output - target).sum(dim=[-1, -2, -3])  # MSE
 
         fig, (ax1, ax2) = plt.subplots(1,2)
-        ax1.imshow(np.clip(target.detach().numpy()[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+        ax1.imshow(np.clip(target.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
         ax1.set_title("Input")
-        ax2.imshow(np.clip(output.detach().numpy()[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+        ax2.imshow(np.clip(output.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
         ax2.set_title("Output")
         plt.savefig('pictures/in_and_output.png')
 
