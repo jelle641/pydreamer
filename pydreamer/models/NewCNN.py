@@ -28,17 +28,17 @@ class NewCNN(nn.Module):
             activation(),
             nn.Conv2d(d*2, d*4, kernels[2], stride),
             activation(),
-            nn.Conv2d(d*4, d*8, 4, stride),
-            activation(),
+            # nn.Conv2d(d*4, d*8, 4, stride),
+            # activation(),
             # nn.Conv2d(d*8, d*16, 2, stride),
             # activation(),
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(d*16, d*8, 2, stride=2),
-            activation(),
-            nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
-            activation(),
+            # nn.ConvTranspose2d(d*16, d*8, 2, stride=2),
+            # activation(),
+            # nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
+            # activation(),
             nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
             activation(),
             nn.ConvTranspose2d(d*2, d, 4, stride=2),
@@ -89,7 +89,7 @@ class NewCNN(nn.Module):
         # y = unflatten_batch(y, bd)
         # instuff, bd1 = flatten_batch(self.x_3, 3)
         y = self.encoder(combined_history)
-        y = self.deep_decoder(y)
+        y = self.decoder(y)
         y = unflatten_batch(y, bd)
         # x_1_out, bd1 = flatten_batch(self.x_1, 3)
         # x_2_out, bd2 = flatten_batch(self.x_2, 3)
