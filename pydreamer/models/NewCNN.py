@@ -47,22 +47,22 @@ class NewCNN(nn.Module):
             activation()
         )
 
-        self.deep_decoder = nn.Sequential(
-            nn.Flatten(),
-            # FC
-            nn.Linear(1536, d * 32),
-            nn.Unflatten(-1, (d * 32, 1, 1)),  # type: ignore
-            # Deconv
-            nn.ConvTranspose2d(d * 32, d * 16, 5, stride),
-            activation(),
-            nn.ConvTranspose2d(d * 16, d * 4, 5, stride),
-            activation(),
-            # nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
-            # activation(),
-            nn.ConvTranspose2d(d * 4, d, 6, stride),
-            activation(),
-            nn.ConvTranspose2d(d, 3, 6, stride)
-        )
+        # self.deep_decoder = nn.Sequential(
+        #     nn.Flatten(),
+        #     # FC
+        #     nn.Linear(1536, d * 32),
+        #     nn.Unflatten(-1, (d * 32, 1, 1)),  # type: ignore
+        #     # Deconv
+        #     nn.ConvTranspose2d(d * 32, d * 16, 5, stride),
+        #     activation(),
+        #     nn.ConvTranspose2d(d * 16, d * 4, 5, stride),
+        #     activation(),
+        #     # nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
+        #     # activation(),
+        #     nn.ConvTranspose2d(d * 4, d, 6, stride),
+        #     activation(),
+        #     nn.ConvTranspose2d(d, 3, 6, stride)
+        # )
 
         self.x_0 = None
         self.x_1 = None
