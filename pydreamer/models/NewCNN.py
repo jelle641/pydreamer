@@ -22,7 +22,7 @@ class NewCNN(nn.Module):
         d = cnn_depth
 
         self.encoder = nn.Sequential(
-            nn.Conv2d(9, d, kernels[0], stride),
+            nn.Conv2d(9, d, kernels[0], stride, bias=False),
             activation(),
             # nn.Conv2d(d, d*2, kernels[1], stride),
             # activation(),
@@ -43,7 +43,7 @@ class NewCNN(nn.Module):
             # activation(),
             # nn.ConvTranspose2d(d*2, d, 4, stride=2),
             # activation(),
-            nn.ConvTranspose2d(d, in_channels, 6, stride=2),
+            nn.ConvTranspose2d(d, in_channels, 6, stride=2, bias=False),
             activation()
         )
 
