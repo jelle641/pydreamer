@@ -24,10 +24,10 @@ class NewCNN(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride),
             activation(),
-            nn.Conv2d(d, d*2, kernels[1], stride),
-            activation(),
-            nn.Conv2d(d*2, d*4, kernels[2], stride),
-            activation(),
+            # nn.Conv2d(d, d*2, kernels[1], stride),
+            # activation(),
+            # nn.Conv2d(d*2, d*4, kernels[2], stride),
+            # activation(),
             # nn.Conv2d(d*4, d*8, 4, stride),
             # activation(),
             # nn.Conv2d(d*8, d*16, 2, stride),
@@ -39,10 +39,10 @@ class NewCNN(nn.Module):
             # activation(),
             # nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
             # activation(),
-            nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
-            activation(),
-            nn.ConvTranspose2d(d*2, d, 4, stride=2),
-            activation(),
+            # nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
+            # activation(),
+            # nn.ConvTranspose2d(d*2, d, 4, stride=2),
+            # activation(),
             nn.ConvTranspose2d(d, in_channels, 6, stride=2),
             activation()
         )
@@ -69,7 +69,7 @@ class NewCNN(nn.Module):
         self.x_2 = None
         self.x_3 = None
         self.iter = 0
-        self.picture_every = 1
+        self.picture_every = 100
 
     def forward(self, x: Tensor) -> Tensor:
         if self.x_0 is None:

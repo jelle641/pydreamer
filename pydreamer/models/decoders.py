@@ -151,6 +151,9 @@ class ConvDecoder(nn.Module):
             activation(),
             nn.ConvTranspose2d(d, out_channels, kernels[3], stride))
 
+        self.iter = 0
+        self.picture_every = 100
+
     def forward(self, x: Tensor, p: Tensor = None) -> Tensor:
         x, bd = flatten_batch(x)
         y = self.model(x)
@@ -161,12 +164,15 @@ class ConvDecoder(nn.Module):
         y = unflatten_batch(y, bd)
 
         if p is not None:
-            fig, (ax1, ax2) = plt.subplots(1,2)
-            ax1.imshow(np.clip(combined_y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax1.set_title("Combined output")
-            ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax2.set_title("decoder output")
-            plt.savefig('pictures/decoder_output.png')
+            self.iter += 1
+            if self.iter == self.picture_every:
+                fig, (ax1, ax2) = plt.subplots(1,2)
+                ax1.imshow(np.clip(combined_y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax1.set_title("Combined output")
+                ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax2.set_title("decoder output")
+                plt.savefig('pictures/decoder_output.png')
+                self.iter = 0
 
         if p is not None:
             return combined_y
@@ -177,12 +183,13 @@ class ConvDecoder(nn.Module):
         target, _ = flatten_batch(target, 3)
         loss = 0.5 * torch.square(output - target).sum(dim=[-1, -2, -3])  # MSE
 
-        fig, (ax1, ax2) = plt.subplots(1,2)
-        ax1.imshow(np.clip(target.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
-        ax1.set_title("Input")
-        ax2.imshow(np.clip(output.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
-        ax2.set_title("Output")
-        plt.savefig('pictures/in_and_output.png')
+        if self.iter == self.picture_every:
+            fig, (ax1, ax2) = plt.subplots(1,2)
+            ax1.imshow(np.clip(target.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax1.set_title("Input")
+            ax2.imshow(np.clip(output.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
+            ax2.set_title("Output")
+            plt.savefig('pictures/in_and_output.png')
 
         return unflatten_batch(loss, bd)
 
