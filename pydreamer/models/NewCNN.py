@@ -121,6 +121,7 @@ class NewCNN(nn.Module):
             ax3.imshow(np.clip(np.mean(np.mean(y.cpu().detach().numpy().astype('float64'), 0), 0).transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax3.set_title("CNN_out mean")
             plt.savefig('pictures/NewCNN_out.png')
+            plt.close(fig)
 
             fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
             ax1.imshow(np.clip(self.x_1.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
@@ -130,6 +131,7 @@ class NewCNN(nn.Module):
             ax3.imshow(np.clip(self.x_3.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax3.set_title("x_3")
             plt.savefig('pictures/history.png')
+            plt.close(fig)
             self.iter = 0
         
 

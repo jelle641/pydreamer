@@ -172,6 +172,7 @@ class ConvDecoder(nn.Module):
                 ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
                 ax2.set_title("decoder output")
                 plt.savefig('pictures/decoder_output.png')
+                plt.close(fig)
                 self.iter = 0
 
         if p is not None:
@@ -190,6 +191,7 @@ class ConvDecoder(nn.Module):
             ax2.imshow(np.clip(output.cpu().detach().numpy().astype('float64')[1].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax2.set_title("Output")
             plt.savefig('pictures/in_and_output.png')
+            plt.close(fig)
 
         return unflatten_batch(loss, bd)
 
