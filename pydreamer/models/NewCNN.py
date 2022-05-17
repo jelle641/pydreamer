@@ -7,7 +7,6 @@ import torch.distributions as D
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from actnorm import ActNorm2d
 
 from .functions import *
 from .common import *
@@ -22,51 +21,16 @@ class NewCNN(nn.Module):
         padding = 1
         d = cnn_depth
 
-        self.encoder = nn.Sequential(
-            nn.Conv2d(9, d, kernels[0], stride, bias=False),
-            ActNorm2d(d),
+        self.model = nn.Sequential(
+            nn.Conv2d(9, d, 4, stride=2, bias=False),
+            nn.BatchNorm2d(d),
             activation(),
-
-            # nn.Conv2d(d, d*2, kernels[1], stride),
-            # activation(),
-            # nn.Conv2d(d*2, d*4, kernels[2], stride),
-            # activation(),
-            # nn.Conv2d(d*4, d*8, 4, stride),
-            # activation(),
-            # nn.Conv2d(d*8, d*16, 2, stride),
-            # activation(),
-        )
-
-        self.decoder = nn.Sequential(
-            # nn.ConvTranspose2d(d*16, d*8, 2, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*2, d, 4, stride=2),
-            # activation(),
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
-            ActNorm2d(in_channels),
+            nn.BatchNorm2d(in_channels),
             activation()
         )
 
-        # self.deep_decoder = nn.Sequential(
-        #     nn.Flatten(),
-        #     # FC
-        #     nn.Linear(1536, d * 32),
-        #     nn.Unflatten(-1, (d * 32, 1, 1)),  # type: ignore
-        #     # Deconv
-        #     nn.ConvTranspose2d(d * 32, d * 16, 5, stride),
-        #     activation(),
-        #     nn.ConvTranspose2d(d * 16, d * 4, 5, stride),
-        #     activation(),
-        #     # nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
-        #     # activation(),
-        #     nn.ConvTranspose2d(d * 4, d, 6, stride),
-        #     activation(),
-        #     nn.ConvTranspose2d(d, 3, 6, stride)
-        # )
+        self.model.apply(self.init_weights())
 
         self.x_0 = None
         self.x_1 = None
@@ -74,6 +38,10 @@ class NewCNN(nn.Module):
         self.x_3 = None
         self.iter = 0
         self.picture_every = 5000
+
+    def init_weights(self, m):
+        if type(m) == nn.Conv2d or type(m) == nn.ConvTranspose2d:
+            m.weight.data.fill(0.01)
 
     def forward(self, x: Tensor) -> Tensor:
         if self.x_0 is not None and self.x_0.size() != x.size():
