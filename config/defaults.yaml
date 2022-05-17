@@ -207,3 +207,8 @@ debug:
   batch_length: 15
   batch_size: 5
   imag_horizon: 3
+
+test:
+  n_steps: 10_000
+  n_env_steps: 50_000
+  generator_prefill_steps: 1_000

@@ -72,6 +72,10 @@ class NewCNN(nn.Module):
         self.picture_every = 100
 
     def forward(self, x: Tensor) -> Tensor:
+        if self.x_0.size() != x.size():
+            print("reset history")
+            self.x_0 = None
+
         if self.x_0 is None:
             self.x_0 = x
             self.x_1 = x
