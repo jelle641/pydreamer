@@ -23,7 +23,9 @@ class NewCNN(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
+            nn.BatchNorm2d(d),
             activation(),
+
             # nn.Conv2d(d, d*2, kernels[1], stride),
             # activation(),
             # nn.Conv2d(d*2, d*4, kernels[2], stride),
@@ -44,6 +46,7 @@ class NewCNN(nn.Module):
             # nn.ConvTranspose2d(d*2, d, 4, stride=2),
             # activation(),
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
+            nn.BatchNorm2d(d),
             activation()
         )
 
@@ -87,7 +90,7 @@ class NewCNN(nn.Module):
             self.x_1 = self.x_0
             self.x_0 = x
 
-        combined_history = torch.cat((self.x_1, self.x_2, self.x_3), 2)
+        combined_history = torch.cat((self.x_1, self.x_2, self.x_3), -3)
         combined_history, bd = flatten_batch(combined_history, 3)
         # y = self.model(combined_history)
         # y = unflatten_batch(y, bd)
