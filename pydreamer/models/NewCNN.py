@@ -116,7 +116,7 @@ class NewCNN(nn.Module):
 
         self.iter += 1
         if self.iter == self.picture_every:
-            print("Creating pictures")
+            print("Creating pictures New CNN")
             fig, (ax1, ax2, ax3) = plt.subplots(1,3)
             ax1.imshow(np.clip(x.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
             ax1.set_title("Input")

@@ -166,6 +166,7 @@ class ConvDecoder(nn.Module):
         if p is not None:
             self.iter += 1
             if self.iter == self.picture_every:
+                print("Creating pictures decoder")
                 fig, (ax1, ax2) = plt.subplots(1,2)
                 ax1.imshow(np.clip(combined_y.cpu().detach().numpy().astype('float64')[0][0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
                 ax1.set_title("Combined output")
