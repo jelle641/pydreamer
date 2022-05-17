@@ -46,7 +46,7 @@ class NewCNN(nn.Module):
             # nn.ConvTranspose2d(d*2, d, 4, stride=2),
             # activation(),
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
-            nn.BatchNorm2d(d),
+            nn.BatchNorm2d(in_channels),
             activation()
         )
 
