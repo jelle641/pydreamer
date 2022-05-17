@@ -23,13 +23,13 @@ class NewCNN(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
-            nn.BatchNorm2d(d),
+            nn.LayerNorm([3, 64, 64]),
             activation(),
         )
 
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
-            nn.BatchNorm2d(in_channels),
+            nn.LayerNorm([3, 64, 64]),
             activation()
         )
 
