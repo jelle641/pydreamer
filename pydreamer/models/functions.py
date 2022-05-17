@@ -84,6 +84,8 @@ def init_weights_tf2(m):
         nn.init.xavier_uniform_(m.weight.data)
         if m.bias is not None:
             nn.init.zeros_(m.bias.data)
+        print(m)
+        print(m.weight)
     if type(m) == nn.GRUCell or type(m) == rnn.GRUCell:
         nn.init.xavier_uniform_(m.weight_ih.data)
         nn.init.orthogonal_(m.weight_hh.data)
