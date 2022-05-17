@@ -7,6 +7,7 @@ import torch.distributions as D
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+from actnorm import ActNorm2d
 
 from .functions import *
 from .common import *
@@ -23,7 +24,7 @@ class NewCNN(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
-            nn.BatchNorm2d(d),
+            ActNorm2d(d),
             activation(),
 
             # nn.Conv2d(d, d*2, kernels[1], stride),
@@ -46,7 +47,7 @@ class NewCNN(nn.Module):
             # nn.ConvTranspose2d(d*2, d, 4, stride=2),
             # activation(),
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
-            nn.BatchNorm2d(in_channels),
+            ActNorm2d(in_channels),
             activation()
         )
 
