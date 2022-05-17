@@ -25,47 +25,13 @@ class NewCNN(nn.Module):
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
             nn.BatchNorm2d(d),
             activation(),
-
-            # nn.Conv2d(d, d*2, kernels[1], stride),
-            # activation(),
-            # nn.Conv2d(d*2, d*4, kernels[2], stride),
-            # activation(),
-            # nn.Conv2d(d*4, d*8, 4, stride),
-            # activation(),
-            # nn.Conv2d(d*8, d*16, 2, stride),
-            # activation(),
         )
 
         self.decoder = nn.Sequential(
-            # nn.ConvTranspose2d(d*16, d*8, 2, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*8, d*4, 4, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*4, d*2, 4, stride=2),
-            # activation(),
-            # nn.ConvTranspose2d(d*2, d, 4, stride=2),
-            # activation(),
             nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
             nn.BatchNorm2d(in_channels),
             activation()
         )
-
-        # self.deep_decoder = nn.Sequential(
-        #     nn.Flatten(),
-        #     # FC
-        #     nn.Linear(1536, d * 32),
-        #     nn.Unflatten(-1, (d * 32, 1, 1)),  # type: ignore
-        #     # Deconv
-        #     nn.ConvTranspose2d(d * 32, d * 16, 5, stride),
-        #     activation(),
-        #     nn.ConvTranspose2d(d * 16, d * 4, 5, stride),
-        #     activation(),
-        #     # nn.ConvTranspose2d(d * 4, d * 2, 5, stride),
-        #     # activation(),
-        #     nn.ConvTranspose2d(d * 4, d, 6, stride),
-        #     activation(),
-        #     nn.ConvTranspose2d(d, 3, 6, stride)
-        # )
 
         self.x_0 = None
         self.x_1 = None

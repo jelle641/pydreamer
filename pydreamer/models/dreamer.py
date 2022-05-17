@@ -243,6 +243,7 @@ class WorldModel(nn.Module):
         for m in self.modules():
             print(m)
             init_weights_tf2(m)
+            print(m.weight)
         
 
     def init_state(self, batch_size: int) -> Tuple[Any, Any]:
