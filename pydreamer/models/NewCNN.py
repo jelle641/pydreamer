@@ -33,7 +33,7 @@ class NewCNN(nn.Module):
         self.x_2 = None
         self.x_3 = None
         self.iter = 0
-        self.picture_every = 5000
+        self.picture_every = 100
 
     def forward(self, x: Tensor) -> Tensor:
         if self.x_0 is not None and self.x_0.size() != x.size():

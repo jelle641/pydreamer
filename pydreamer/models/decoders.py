@@ -152,7 +152,7 @@ class ConvDecoder(nn.Module):
             nn.ConvTranspose2d(d, out_channels, kernels[3], stride))
 
         self.iter = 0
-        self.picture_every = 5000
+        self.picture_every = 100
 
     def forward(self, x: Tensor, p: Tensor = None) -> Tensor:
         x, bd = flatten_batch(x)
