@@ -1,3 +1,8 @@
+test:
+  n_steps: 10_000
+  n_env_steps: 50_000
+  generator_prefill_steps: 1_000
+
 defaults:
   # Job
   n_steps: 1_000_000
