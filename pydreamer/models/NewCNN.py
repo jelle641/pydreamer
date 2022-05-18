@@ -21,15 +21,10 @@ class NewCNN(nn.Module):
         padding = 1
         d = cnn_depth
 
-        self.encoder = nn.Sequential(
+        self.model = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
-            nn.LayerNorm([3, 64, 64]),
             activation(),
-        )
-
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
-            nn.LayerNorm([3, 64, 64]),
+            nn.ConvTranspose2d(d, in_channels, kernels[1], stride=2, bias=False),
             activation()
         )
 
@@ -58,31 +53,9 @@ class NewCNN(nn.Module):
 
         combined_history = torch.cat((self.x_1, self.x_2, self.x_3), -3)
         combined_history, bd = flatten_batch(combined_history, 3)
-        # y = self.model(combined_history)
-        # y = unflatten_batch(y, bd)
-        # instuff, bd1 = flatten_batch(self.x_3, 3)
-        y = self.encoder(combined_history)
-        y = self.decoder(y)
+        y = self.model(combined_history)
         y = unflatten_batch(y, bd)
-        # x_1_out, bd1 = flatten_batch(self.x_1, 3)
-        # x_2_out, bd2 = flatten_batch(self.x_2, 3)
-        # x_3_out, bd3 = flatten_batch(self.x_3, 3)
-        # y_1 = self.encoder(x_1_out)
-        # y_2 = self.encoder(x_2_out)
-        # y_3 = self.encoder(x_3_out)
-        # y = torch.stack((y_1, y_2, y_3), 1)
-        # # print(f"size y after encoder: {y.size()}")
-        # y = self.neuralnetwork(y)
-        # # print(f"size y after nn: {y.size()}")
-        # y = self.decoder(y)
-        # y = unflatten_batch(y, bd1)
-
-        # print(f"size history: {combined_history.size()}")
-        # print(f"size x input: {x.size()}")
-        # print(f"size y after decoder: {y.size()}")
-        # print(f"size y numpy: {np.shape(y.detach().numpy())}")
-        # print(f"size y numpy 1 mean: {np.shape(np.mean(y.detach().numpy(), 0))}")
-
+       
         self.iter += 1
         if self.iter == self.picture_every:
             print("Creating pictures New CNN")
