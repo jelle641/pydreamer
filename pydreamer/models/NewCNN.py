@@ -23,7 +23,7 @@ class NewCNN(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(9, d, kernels[0], stride, bias=False),
-            nn.LayerNorm([3, 64, 64]),
+            nn.LayerNorm([48, 31, 31]),
             activation(),
         )
 
