@@ -57,30 +57,33 @@ class NewCNN(nn.Module):
         y = self.model(combined_history)
         y = unflatten_batch(y, bd)
         y = torch.squeeze(y)
-       
+
         self.iter += 1
         if self.iter == self.picture_every:
-            print("Creating pictures New CNN")
-            fig, (ax1, ax2, ax3) = plt.subplots(1,3)
-            ax1.imshow(np.clip(x.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax1.set_title("Input")
-            ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax2.set_title("CNN_out 1")
-            ax3.imshow(np.clip(np.mean(np.mean(y.cpu().detach().numpy().astype('float64'), 0), 0).transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax3.set_title("CNN_out mean")
-            plt.savefig('pictures/NewCNN_out.png')
-            plt.close(fig)
+            try:
+                print("Creating pictures New CNN")
+                fig, (ax1, ax2, ax3) = plt.subplots(1,3)
+                ax1.imshow(np.clip(x.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax1.set_title("Input")
+                ax2.imshow(np.clip(y.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax2.set_title("CNN_out 1")
+                ax3.imshow(np.clip(np.mean(np.mean(y.cpu().detach().numpy().astype('float64'), 0), 0).transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax3.set_title("CNN_out mean")
+                plt.savefig('pictures/NewCNN_out.png')
+                plt.close(fig)
 
-            fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-            ax1.imshow(np.clip(self.x_1.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax1.set_title("x_1")
-            ax2.imshow(np.clip(self.x_2.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax2.set_title("x_2")
-            ax3.imshow(np.clip(self.x_3.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-            ax3.set_title("x_3")
-            plt.savefig('pictures/history.png')
-            plt.close(fig)
-            self.iter = 0
+                fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+                ax1.imshow(np.clip(self.x_1.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax1.set_title("x_1")
+                ax2.imshow(np.clip(self.x_2.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax2.set_title("x_2")
+                ax3.imshow(np.clip(self.x_3.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                ax3.set_title("x_3")
+                plt.savefig('pictures/history.png')
+                plt.close(fig)
+                self.iter = 0
+            except:
+                pass
         
 
         return y
