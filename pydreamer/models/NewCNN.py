@@ -16,15 +16,16 @@ class NewCNN(nn.Module):
     def __init__(self, in_channels=3, cnn_depth=32, activation=nn.ELU):
         super().__init__()
         self.out_dim = cnn_depth * 32
-        kernels = (4, 4, 4, 4)
+        kernels = (3, 3, 4, 4)
         stride = 2
         padding = 1
         d = cnn_depth
 
         self.model = nn.Sequential(
-            nn.Conv2d(9, d, kernels[0], stride, bias=False),
+            nn.Conv3d(3, d, kernels[0], stride, bias=False),
             activation(),
-            nn.ConvTranspose2d(d, in_channels, kernels[1], stride=2, bias=False),
+            nn.ConvTranspose3d(d, 1, kernels[1], stride=2, bias=False),
+            nn.ReflectionPad3d((1, 0, 1, 0, 0, 0)),
             activation()
         )
 
@@ -51,10 +52,11 @@ class NewCNN(nn.Module):
             self.x_1 = self.x_0
             self.x_0 = x
 
-        combined_history = torch.cat((self.x_1, self.x_2, self.x_3), -3)
-        combined_history, bd = flatten_batch(combined_history, 3)
+        combined_history = torch.stack((self.x_1, self.x_2, self.x_3), 2)
+        combined_history, bd = flatten_batch(combined_history, 4)
         y = self.model(combined_history)
         y = unflatten_batch(y, bd)
+        y = torch.squeeze(y)
        
         self.iter += 1
         if self.iter == self.picture_every:
