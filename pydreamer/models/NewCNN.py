@@ -1,4 +1,5 @@
 from decimal import DivisionImpossible
+from tkinter import E
 from typing import Optional, Union
 from numpy import size
 import torch
@@ -7,59 +8,57 @@ import torch.distributions as D
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import math
 
 from .functions import *
 from .common import *
 
 class NewCNN(nn.Module):
 
-    def __init__(self, in_channels=3, cnn_depth=32, activation=nn.ELU):
+    def __init__(self, in_channels=3, cnn_depth=32, activation=nn.ReLU):
         super().__init__()
         self.out_dim = cnn_depth * 32
         kernels = (3, 3, 4, 4)
         stride = 2
         padding = 1
-        d = cnn_depth
+        d = 32
+
+        self.hist_size = 5
 
         self.model = nn.Sequential(
-            nn.Conv3d(3, d, kernels[0], stride, bias=False),
+            nn.Conv3d(self.hist_size, d, kernels[0], stride, bias=False),
             activation(),
             nn.ConvTranspose3d(d, 1, kernels[1], stride=2, bias=False),
             nn.ReflectionPad3d((1, 0, 1, 0, 0, 0)),
             activation()
         )
 
-        self.x_0 = None
-        self.x_1 = None
-        self.x_2 = None
-        self.x_3 = None
+        self.hist = [None] * self.hist_size
+        self.last_input = None
         self.iter = 0
-        self.picture_every = 100
+        self.picture_every = 10
 
     def forward(self, x: Tensor) -> Tensor:
-        if self.x_0 is not None and self.x_0.size() != x.size():
+        if self.hist[0] is not None and self.hist[0].size() != x.size():
             print("reset history")
-            self.x_0 = None
+            self.hist = [None] * self.hist_size
 
-        if self.x_0 is None:
-            self.x_0 = x
-            self.x_1 = x
-            self.x_2 = x
-            self.x_3 = x
+        if self.hist[0] is None:
+            for i in range(self.hist_size):
+                self.hist[i] = x
         else:
-            self.x_3 = self.x_2
-            self.x_2 = self.x_1
-            self.x_1 = self.x_0
-            self.x_0 = x
+            for i in range(self.hist_size-1):
+                self.hist[self.hist_size - i - 1] = self.hist[self.hist_size - i - 2]
+            self.hist[0] = self.last_input
 
-        combined_history = torch.stack((self.x_1, self.x_2, self.x_3), 2)
+        combined_history = torch.stack(self.hist, 2)
         combined_history, bd = flatten_batch(combined_history, 4)
         y = self.model(combined_history)
         y = unflatten_batch(y, bd)
         y = torch.squeeze(y)
 
         self.iter += 1
-        if self.iter == self.picture_every:
+        if self.iter >= self.picture_every:
             try:
                 print("Creating pictures New CNN")
                 fig, (ax1, ax2, ax3) = plt.subplots(1,3)
@@ -72,18 +71,17 @@ class NewCNN(nn.Module):
                 plt.savefig('pictures/NewCNN_out.png')
                 plt.close(fig)
 
-                fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-                ax1.imshow(np.clip(self.x_1.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-                ax1.set_title("x_1")
-                ax2.imshow(np.clip(self.x_2.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-                ax2.set_title("x_2")
-                ax3.imshow(np.clip(self.x_3.cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
-                ax3.set_title("x_3")
+                fig, axs = plt.subplots(math.ceil(self.hist_size/3), 3, squeeze=False)
+                for i in range(self.hist_size):
+                    axs[math.floor(i/3)][i%3].imshow(np.clip(self.hist[i].cpu().detach().numpy().astype('float64')[0][0].transpose((1,2,0)), 0, 1), interpolation='nearest')
+                    axs[math.floor(i/3)][i%3].set_title(f"x_{i+1}")
                 plt.savefig('pictures/history.png')
                 plt.close(fig)
                 self.iter = 0
-            except:
-                pass
+            except Exception as e:
+                print("found error while creating pictures:")
+                print(e)
+        self.last_input = x
         
 
         return y

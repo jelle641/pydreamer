@@ -129,6 +129,7 @@ Run training (full GPU mode)
 
 ```sh
 python train.py --configs defaults atari atari_pong --run_name atari_pong_1
+# python -m atari_py.import_roms .\Roms
 ```
 
 ### Running with Docker

@@ -2,6 +2,10 @@
 # Atari
 # -------------------------
 
+atari_pinball:
+  n_env_steps: 20_000_000
+  env_id: Atari-Video_Pinball
+
 atari_pong:
   n_env_steps: 20_000_000
   env_id: Atari-Pong
