@@ -21,11 +21,20 @@ class NewCNN(nn.Module):
         kernels = (3, 3, 4, 4)
         stride = 2
         padding = 1
-        d = 32
+        d = 64
 
         self.hist_size = 5
 
         self.model = nn.Sequential(
+            nn.Conv2d(self.hist_size * 3, d, 4, stride, bias=False),
+            nn.BatchNorm2d(d),
+            activation(),
+            nn.ConvTranspose2d(d, in_channels, 4, stride=2, bias=False),
+            nn.BatchNorm2d(in_channels),
+            activation()
+        )
+
+        self.model_3d = nn.Sequential(
             nn.Conv3d(self.hist_size, d, kernels[0], stride, bias=False),
             activation(),
             nn.ConvTranspose3d(d, 1, kernels[1], stride=2, bias=False),
@@ -36,7 +45,7 @@ class NewCNN(nn.Module):
         self.hist = [None] * self.hist_size
         self.last_input = None
         self.iter = 0
-        self.picture_every = 10
+        self.picture_every = 100
 
     def forward(self, x: Tensor) -> Tensor:
         if self.hist[0] is not None and self.hist[0].size() != x.size():
@@ -51,11 +60,16 @@ class NewCNN(nn.Module):
                 self.hist[self.hist_size - i - 1] = self.hist[self.hist_size - i - 2]
             self.hist[0] = self.last_input
 
-        combined_history = torch.stack(self.hist, 2)
-        combined_history, bd = flatten_batch(combined_history, 4)
+        combined_history = torch.cat(self.hist, -3)
+        combined_history, bd = flatten_batch(combined_history, 3)
         y = self.model(combined_history)
         y = unflatten_batch(y, bd)
-        y = torch.squeeze(y)
+
+        # combined_history = torch.stack(self.hist, 2)
+        # combined_history, bd = flatten_batch(combined_history, 4)
+        # y = self.model(combined_history)
+        # y = unflatten_batch(y, bd)
+        # y = torch.squeeze(y)
 
         self.iter += 1
         if self.iter >= self.picture_every:
