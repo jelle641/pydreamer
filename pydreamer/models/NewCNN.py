@@ -23,7 +23,7 @@ class NewCNN(nn.Module):
         padding = 1
         d = 64
 
-        self.hist_size = 5
+        self.hist_size = 2
 
         self.model = nn.Sequential(
             nn.Conv2d(self.hist_size * 3, d, 4, stride, bias=False),
